@@ -1,0 +1,22 @@
+Features to have:
+
+Compare / rank cities in an easy side by side method
+
+allow user to select cities + what metric to compare
+->graph it out
+
+goal:
+-multi city comparison
+-greater analysis into a single city?
+ - chord diagram in change of $$
+
+
+Add feature to select what to show on graph...
+
+
+Data would be better if could query a relational database
+Why is there signifigant lag when using the website?
+
+better to query data or grab all?
+Create a table at the bottom? to go along with chart?
+Concatinate all the JSON files together rather than add to a object array...

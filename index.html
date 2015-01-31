@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Open Gov Data Viz</title>
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+		<script src="d3/d3.js"></script>
+		<link rel="stylesheet" href="style.css">
+
+		<!-- Highcharts -->
+		<script src="http://code.highcharts.com/highcharts.js"></script>
+
+  </head>
+
+	<body>
+		<!-- Single button -->
+		<div class="city-input">
+			<h4>Select Cities To Compare</h4>
+			<!-- select cities with drop down -->
+			<select id="city1_dropdown">
+			  <option>Select City</option>
+			</select>
+			<select id="city2_dropdown">
+			  <option>Select City</option>
+			</select>
+			<select id="city3_dropdown">
+			  <option>Select City</option>
+			</select>
+			<select id="city4_dropdown">
+			  <option>Select City</option>
+			</select>
+
+			<h4 id="apply-selected-cities">Apply Input + Get Data</h4>
+			<h4 id="apply-graph">Apply Graph</h4>
+			<h4 id="adjust-graph">Adjust for Population</h4>
+		</div>
+
+		<div id="container"></div>
+		<div id="place"></div>
+	</body>
+
+	<!-- HighCharts -->
+	<script type="text/javascript">
+		function createChart(series_input, title, yUnits){
+			$(function () {
+		    $('#container').highcharts({
+		    	chart: {
+		    		id: 'main'
+		    	},
+				  title: {
+			      text: title,
+			      x: -20 //center
+				  },
+				  subtitle: {
+			      text: 'Place Holder',
+			      x: -20
+				  },
+				  xAxis: {
+			      categories: ['2007', '2008', '2009', '2010', '2011', '2012']
+				  },
+				  yAxis: {
+			      title: {
+			        text: yUnits
+			      },
+			      plotLines: [{
+		          value: 0,
+		          width: 1,
+		          color: '#808080'
+			      }]
+				  },
+				  tooltip: {
+				    valueSuffix: '$'
+				  },
+				  legend: {
+			      layout: 'vertical',
+			      align: 'right',
+			      verticalAlign: 'middle',
+			      borderWidth: 0
+				  },
+					series: series_input
+				});
+			});
+		}
+	</script>
+
+	<!-- logic related -->
+	<script type="text/javascript">
+		var city_name_id = [];
+		var city_data = [];//array of objects with arrays inside
+		var current_cities = [];
+		var list_of_metrics = [];
+
+		//to create the city_name_id -> getting names + id
+		$.ajax({
+	    url: "http://sbhacks.opengovhacks.com/api/v1/cities",
+	    dataType: 'json'
+		})
+		.done(function(data) {
+	    //intially had problems accessing multi level JSON, below is working example
+	    for(var key in data.cities) {
+	    	//$('#place').append(data.cities[key].id + " -> " + data.cities[key].name + "<br>");
+	    	city_name_id.push({
+	    		name: data.cities[key].name,
+	    		id: data.cities[key].id
+	    	});
+	    	//console.log(data.cities[key])
+	    }
+	    //Update dropdown with populated cities:
+	    //why errors arise when combined?
+    	for(i in city_name_id){
+		    var option = document.createElement("option");
+		    option.text = city_name_id[i].name;
+		    document.getElementById("city1_dropdown").add(option);
+		  }
+		  for(i in city_name_id){
+		    var option = document.createElement("option");
+		    option.text = city_name_id[i].name;
+		    document.getElementById("city2_dropdown").add(option);
+		  }
+		  for(i in city_name_id){
+		    var option = document.createElement("option");
+		    option.text = city_name_id[i].name;
+		    document.getElementById("city3_dropdown").add(option);
+		  }
+		  for(i in city_name_id){
+		    var option = document.createElement("option");
+		    option.text = city_name_id[i].name;
+		    document.getElementById("city4_dropdown").add(option);
+		  }
+	    //prints out city_name_id once filled
+			/*for (city in city_name_id){
+				console.log(city_name_id[city].name + " : " + city_name_id[city].id)
+			}*/
+		});
+
+		//grabs city data
+		function getCityMetrics(city_name){
+			for (city in city_name_id){
+				if(city_name_id[city].name === city_name){
+					var id = city_name_id[city].id;
+					console.log(id)
+					setTimeout(function(){
+						getMetrics(id, function(data){
+							var city_metrics =  data;
+							city_data.push({
+								id: city_metrics
+							})
+						}); //callback issue...
+					}, 1000);
+					//getGeneralLedger(id); //calling general ledger
+					break;
+				}
+			}
+
+			function getMetrics(id, fn){
+				var local_metric_complete = [];
+				$.ajax({
+					url: "http://sbhacks.opengovhacks.com/api/v1/cities/" + id + "/metrics.json",
+			    dataType: 'json'
+				})
+				.done(function(data){
+					//console.log(JSON.stringify(data, null, 2));
+					list_of_metrics = [];
+					//retrieving contents
+					for(var key in data.metrics) {
+						var metric_name = data.metrics[key].name;
+						list_of_metrics.push(metric_name);
+						console.log(metric_name + " : " + key)
+			    	$('#place').append("<br>" + metric_name + " -> ");
+			    	var temp_array = [];
+			    	for(var date in data.metrics[key].years){
+			    		$('#place').append(" " + data.metrics[key].years[date].year + " : " + data.metrics[key].years[date].value + ",");
+			    		//adding values to temporary array before moving to city_data array
+			    		temp_array.push(data.metrics[key].years[date].value);
+			    	}
+			    	local_metric_complete.push({//how to push to the right array
+			    		metric_name: temp_array
+			    	});
+			    }
+			    fn(local_metric_complete)
+			    console.log(list_of_metrics)
+				})
+			}
+			function getGeneralLedger(id){
+				$.ajax({
+					url: "http://sbhacks.opengovhacks.com/api/v1/cities/" + id + "/general_ledger.json",
+			    dataType: 'json'
+				})
+				.done(function(data){
+					console.log(JSON.stringify(data, null, 2));
+				})
+			}
+		}//end of getCityMetrics()
+
+		//data Querying, should use to search in the ledgers
+/*		var body = {
+			"query": {
+				"bool": {
+					"must": [
+						{ "match": { "entity": 23 }},
+						{ "match": { "name": "population"}}
+					]
+				}
+			}
+		};
+		$.ajax({
+			type: "POST",
+			url: "http://sbhacks.opengovhacks.com/api/v1/metrics/_search",
+			data: body
+		})
+		.error(function( jqXHR, textStatus, errorThrown){
+			console.log(jqXHR);
+		})
+		.done(function(data){
+			console.log("doing POST")
+			console.log(JSON.stringify(data, null, 2));
+		});*/
+
+
+		//Looks at text in boxe -> then grabs associated data
+		$('#apply-selected-cities').click(function(){
+			$('#place').empty();
+			current_cities = [
+				document.getElementById('city1_dropdown').value,
+				document.getElementById('city2_dropdown').value,
+				document.getElementById('city3_dropdown').value,
+				document.getElementById('city4_dropdown').value
+			];
+			//to eliminate empty cells in array
+			current_cities = cleanArray(current_cities);
+			function cleanArray(old){
+			  var newArray = new Array();
+			  for(var i = 0; i<old.length; i++){
+			      if (old[i] && old[i] !== "Select City"){
+			        newArray.push(old[i]);
+			    }
+			  }
+			  return newArray;
+			}
+
+			for (city in current_cities){
+				console.log(current_cities[city]);//prints name of city
+				getCityMetrics(current_cities[city]);
+			}
+		});
+		$('#apply-graph').click(function(){
+			var series_input = [];
+
+			for(city in current_cities){
+				//currently accessing an object in the array
+				//console.log(city_data[city]); //why is 0-1 passed in rather than id val
+				var data_input = [];
+				for (val in city_data[city]){
+					console.log(city_data[city][val][0]);//currently accessing population array
+					for(final_val in city_data[city][val][0]){
+						console.log(city_data[city][val][9][final_val]);
+						data_input = city_data[city][val][9][final_val];
+					}
+				}
+				series_input.push({
+					name: current_cities[city],
+					data: data_input 	
+				});
+			}
+			createChart(series_input, "Murders Raw", "Total");
+		});
+		$('#adjust-graph').click(function(){
+			var series_input = [];
+
+			for(city in current_cities){
+				var data_input = [];
+				for (val in city_data[city]){
+					for(final_val in city_data[city][val][9]){
+						for(indiv_val in city_data[city][val][9][final_val]){
+							var value = city_data[city][val][9][final_val][indiv_val];
+							var pop = city_data[city][val][0][final_val][indiv_val]
+							data_input.push(value/pop * 100000); //per 100k
+						}
+					}
+				}
+				console.log(data_input)
+				series_input.push({
+					name: current_cities[city],
+					data: data_input 	
+				});
+			}
+			createChart(series_input, "Murders - Adjusted", "Per Hundred Thousand");
+		});
+	</script>
+
+
+</html>
