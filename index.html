@@ -17,44 +17,44 @@
 		<h1>Run Off - The City Comparator</h1>
 
 		<!-- Left Column -->
-		<div class="btn-bar col-xs-3 top-styling">
-			<h4 id="apply-selected-cities">Load Data</h4>
-			<h4 id="apply-graph">Apply Filter + Select View</h4>
-			<h4 id="adjust-graph">Adjust for Population</h4>
-		</div>
+		<div class="top-center-container">
+			<div class="btn-bar col-xs-3 top-styling">
+				<h4 id="apply-selected-cities">Load Data</h4>
+				<h4 id="apply-graph">Apply Filter + Select View</h4>
+				<h4 id="adjust-graph">Adjust for Population</h4>
+			</div>
+			<div class="top-styling col-xs-9 text-align-right">
+				<h4>Select Cities To Compare:</h4>
+				<!-- select cities with drop down -->
+				<select id="city1_dropdown">
+				  <option>Select City</option>
+				</select>
+				<select id="city2_dropdown">
+				  <option>Select City</option>
+				</select>
+				<select id="city3_dropdown">
+				  <option>Select City</option>
+				</select>
+				<select id="city4_dropdown">
+				  <option>Select City</option>
+				</select>
+				<select id="city5_dropdown">
+				  <option>Select City</option>
+				</select>
+				<select id="city6_dropdown">
+				  <option>Select City</option>
+				</select>
+				<select id="city7_dropdown">
+				  <option>Select City</option>
+				</select>
+				<select id="city8_dropdown">
+				  <option>Select City</option>
+				</select>
 
-
-		<div class="top-styling col-xs-9 text-align-right">
-			<h4>Select Cities To Compare:</h4>
-			<!-- select cities with drop down -->
-			<select id="city1_dropdown">
-			  <option>Select City</option>
-			</select>
-			<select id="city2_dropdown">
-			  <option>Select City</option>
-			</select>
-			<select id="city3_dropdown">
-			  <option>Select City</option>
-			</select>
-			<select id="city4_dropdown">
-			  <option>Select City</option>
-			</select>
-			<select id="city5_dropdown">
-			  <option>Select City</option>
-			</select>
-			<select id="city6_dropdown">
-			  <option>Select City</option>
-			</select>
-			<select id="city7_dropdown">
-			  <option>Select City</option>
-			</select>
-			<select id="city8_dropdown">
-			  <option>Select City</option>
-			</select>
-
-			<select id="graph-dropdown">
-			  <option>Select View</option>
-			</select>
+				<select id="graph-dropdown">
+				  <option>Select View</option>
+				</select>
+			</div>
 		</div>
 
 		<div id="content">
@@ -110,7 +110,8 @@
 			      }]
 				  },
 				  tooltip: {
-				    valueSuffix: '$'
+				    valueSuffix: '$',
+				    crosshairs: [true]
 				  },
 				  legend: {
 			      layout: 'vertical',
