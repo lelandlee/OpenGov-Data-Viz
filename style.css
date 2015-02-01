@@ -1,2 +1,51 @@
-.city-input{
+h1{
+	text-align: center;
+}
+
+.top-styling{
+	height: 100px;
+	margin-top: 30px;
+	margin-bottom: 30px;
+}
+
+.btn-bar{
+	width: 200px;
+}
+
+#place{
+	margin: 0px 10% 0px 10%;
+	text-align: center;
+}
+
+#container{
+	margin: 0px 10% 0px 10%;
+	text-align: center;
+	height: 500px;
+}
+
+#disclaimer{
+	margin: 20px 20% 20px 20%;
+	text-align: center;
+	font-weight: 999;
+}
+
+#data-table{
+	border: 1px dashed marroon;
+	margin-top: 200px;
+	text-align: left;
+	text-align: center;
+	margin-left: 10%;
+	margin-right: 10%;	
+}
+
+table {
+  border-collapse: collapse;
+}
+
+table, th, td {
+  border: 1px solid black;
+}
+
+td{
+	height: 30px;
 }

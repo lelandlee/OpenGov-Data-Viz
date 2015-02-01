@@ -10,12 +10,22 @@
 		<!-- Highcharts -->
 		<script src="http://code.highcharts.com/highcharts.js"></script>
 
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
   </head>
 
 	<body>
-		<!-- Single button -->
-		<div class="city-input">
-			<h4>Select Cities To Compare</h4>
+		<h1>Run Off - The City Comparator</h1>
+
+		<!-- Left Column -->
+		<div class="btn-bar col-xs-3 top-styling">
+			<h4 id="apply-selected-cities">Load Data</h4>
+			<h4 id="apply-graph">Apply Filter + Select View</h4>
+			<h4 id="adjust-graph">Adjust for Population</h4>
+		</div>
+
+
+		<div class="top-styling col-xs-9 text-align-right">
+			<h4>Select Cities To Compare:</h4>
 			<!-- select cities with drop down -->
 			<select id="city1_dropdown">
 			  <option>Select City</option>
@@ -29,21 +39,49 @@
 			<select id="city4_dropdown">
 			  <option>Select City</option>
 			</select>
+			<select id="city5_dropdown">
+			  <option>Select City</option>
+			</select>
+			<select id="city6_dropdown">
+			  <option>Select City</option>
+			</select>
+			<select id="city7_dropdown">
+			  <option>Select City</option>
+			</select>
+			<select id="city8_dropdown">
+			  <option>Select City</option>
+			</select>
 
 			<select id="graph-dropdown">
 			  <option>Select View</option>
 			</select>
-			<h4 id="apply-selected-cities">Load Data</h4>
-			<h4 id="apply-graph">Apply Filter + Select View</h4>
-			<h4 id="adjust-graph">Adjust for Population</h4>
 		</div>
 
-		<div id="container"></div>
-		<div id="place"></div>
+		<div id="content">
+			<div id="container"></div>
+			<table style="width:80%" id="data-table">
+			  <tr>
+			    <th>______</th>
+			    <th>2012</th>
+			    <th>2011</th>
+			    <th>2010</th>
+			    <th>2009</th>
+			    <th>2008</th>
+			    <th>2007</th>
+			  </tr>
+			</table>
+			<div id="place"></div>
+			<!-- Why need to wait for some text above to show first? -->
+			<div id="disclaimer">
+				<p>Note: Data is from OpenGov.com, note not all data sets are complete leading to some cities with empty cells.</p>
+			</div>
+		</div>
 	</body>
 
 	<!-- HighCharts -->
 	<script type="text/javascript">
+		//have empty chart initalised in begining
+		createChart([], "Chart", "y-axis units");
 		function createChart(series_input, title, yUnits){
 			$(function () {
 		    $('#container').highcharts({
@@ -103,6 +141,7 @@
 	    //intially had problems accessing multi level JSON, below is working example
 	    for(var key in data.cities) {
 	    	//$('#place').append(data.cities[key].id + " -> " + data.cities[key].name + "<br>");
+	    	//$('#place').append(data.cities[key].geographic_data.latitude + " , " + data.cities[key].geographic_data.longitude + "<br>");
 	    	city_name_id.push({
 	    		name: data.cities[key].name,
 	    		id: data.cities[key].id
@@ -130,6 +169,26 @@
 		    var option = document.createElement("option");
 		    option.text = city_name_id[i].name;
 		    document.getElementById("city4_dropdown").add(option);
+		  }
+		  for(i in city_name_id){
+		    var option = document.createElement("option");
+		    option.text = city_name_id[i].name;
+		    document.getElementById("city5_dropdown").add(option);
+		  }
+		  for(i in city_name_id){
+		    var option = document.createElement("option");
+		    option.text = city_name_id[i].name;
+		    document.getElementById("city6_dropdown").add(option);
+		  }
+		  for(i in city_name_id){
+		    var option = document.createElement("option");
+		    option.text = city_name_id[i].name;
+		    document.getElementById("city7_dropdown").add(option);
+		  }
+		  for(i in city_name_id){
+		    var option = document.createElement("option");
+		    option.text = city_name_id[i].name;
+		    document.getElementById("city8_dropdown").add(option);
 		  }
 	    //prints out city_name_id once filled
 			/*for (city in city_name_id){
@@ -174,12 +233,13 @@
 						var metric_name = data.metrics[key].name;
 						list_of_metrics.push(metric_name);
 						console.log(metric_name + " : " + key)
-			    	$('#place').append("<br>" + metric_name + " -> ");
+			    	//$('#place').append("<br>" + metric_name + " -> ");
 			    	var temp_array = [];
 			    	for(var date in data.metrics[key].years){
-			    		$('#place').append(" " + data.metrics[key].years[date].year + " : " + data.metrics[key].years[date].value + ",");
+			    		//$('#place').append(" " + data.metrics[key].years[date].year + " : " + data.metrics[key].years[date].value + ",");
 			    		temp_array.push(data.metrics[key].years[date].value);
 			    	}
+			    	updateTable(metric_name, temp_array);
 			    	local_metric_complete.push({//how to push to the right array
 			    		metric_name: temp_array
 			    	});
@@ -193,6 +253,19 @@
 				  }
 				})
 			}
+
+			function updateTable(name, data) {
+		    var table = document.getElementById("data-table");
+		    var num_rows = table.rows.length
+		    var row = table.insertRow(num_rows);
+		    var cell1 = row.insertCell(0);
+		    cell1.innerHTML = name;
+		    for(var i = 0; i < data.length; i++){
+		    	var cell = row.insertCell(i + 1);
+			    cell.innerHTML = data[i];
+		    }
+			}
+
 			function getGeneralLedger(id){
 				$.ajax({
 					url: "http://sbhacks.opengovhacks.com/api/v1/cities/" + id + "/general_ledger.json",
@@ -247,15 +320,24 @@
 			});
 		}; //end of getSingleMetricData()
 
+		function clearTable(){
+				$("#data-table td").remove(); 
+			}
+
 
 		//Looks at text in boxe -> then grabs associated data
 		$('#apply-selected-cities').click(function(){
+			clearTable();
 			$('#place').empty();
 			current_cities = [
 				document.getElementById('city1_dropdown').value,
 				document.getElementById('city2_dropdown').value,
 				document.getElementById('city3_dropdown').value,
-				document.getElementById('city4_dropdown').value
+				document.getElementById('city4_dropdown').value,
+				document.getElementById('city5_dropdown').value,
+				document.getElementById('city6_dropdown').value,
+				document.getElementById('city7_dropdown').value,
+				document.getElementById('city8_dropdown').value
 			];
 			//to eliminate empty cells in array
 			current_cities = cleanArray(current_cities);
@@ -294,7 +376,9 @@
 			}
 			setTimeout(function(){
 				var content = document.getElementById("graph-dropdown").value;
-				createChart(series_input, content + "Per Year, Unadjusted", "Total");
+				series_input = addAverage(series_input);
+
+				createChart(series_input, content + " Per Year, Unadjusted", "Total");
 				console.log(series_input);
 			}, 1000)
 		});
@@ -303,8 +387,10 @@
 		$('#adjust-graph').click(function(){
 			var series_input = [];
 
-				var param = document.getElementById("graph-dropdown").value;
-				var pop = getSingleMetricData(current_cities[city], param, function(data1){
+			var param = document.getElementById("graph-dropdown").value;
+			//why not getting below?
+			for(city in current_cities){
+				getSingleMetricData(current_cities[city], param, function(data1){
 					console.log("inner out");
 					setTimeout(function(){ 
 						var pop = city_population[0].data.metric_name;
@@ -320,15 +406,31 @@
 						});
 					}, 1000);
 				});
-
-
 			}
+
 			setTimeout(function(){
 				var content = document.getElementById("graph-dropdown").value;
+				series_input = addAverage(series_input);
 				createChart(series_input, content + " - Adjusted", "Per Hundred Thousand");
 				console.log(series_input);
-			}, 2000)
+			}, 2000);
 		});
+
+		//used to create moving average
+		function addAverage(series_input){
+			var temp_data = [0,0,0,0,0,0];
+			var n = series_input.length;
+			for(arr in series_input){
+				for(data_val in series_input[arr].data){
+					temp_data[data_val] += series_input[arr].data[data_val]/n;
+				}
+			}
+			series_input.push({
+				name: "AVERAGE",
+				data: temp_data
+			});
+			return series_input;
+		}
 	</script>
 
 

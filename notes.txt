@@ -29,3 +29,9 @@ Add maps with data points -> when click -> show on chart
 Had two options for accessing info:
 -grab from local data structure -> everything is preloaded -> less delay later
 -use elastic search for each one...
+
+show two charts -> adjusted + non adjusted
+
+
+add moving adverage?
+
