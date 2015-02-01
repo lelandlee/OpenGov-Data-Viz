@@ -30,8 +30,11 @@
 			  <option>Select City</option>
 			</select>
 
-			<h4 id="apply-selected-cities">Apply Input + Get Data</h4>
-			<h4 id="apply-graph">Apply Graph</h4>
+			<select id="graph-dropdown">
+			  <option>Select View</option>
+			</select>
+			<h4 id="apply-selected-cities">Load Data</h4>
+			<h4 id="apply-graph">Apply Filter + Select View</h4>
 			<h4 id="adjust-graph">Adjust for Population</h4>
 		</div>
 
@@ -90,7 +93,7 @@
 		var current_cities = [];
 		var list_of_metrics = [];
 
-		//to create the city_name_id -> getting names + id
+		//to create the city_name_id -> getting names + id ->  turn into callback
 		$.ajax({
 	    url: "http://sbhacks.opengovhacks.com/api/v1/cities",
 	    dataType: 'json'
@@ -141,7 +144,7 @@
 					console.log(id)
 					setTimeout(function(){
 						getMetrics(id, function(data){
-							var city_metrics =  data;
+							var city_metrics = data;
 							city_data.push({
 								id: city_metrics
 							})
@@ -179,6 +182,11 @@
 			    }
 			    fn(local_metric_complete)
 			    console.log(list_of_metrics)
+			    for(i in list_of_metrics){
+				    var option = document.createElement("option");
+				    option.text = list_of_metrics[i];
+				    document.getElementById("graph-dropdown").add(option);
+				  }
 				})
 			}
 			function getGeneralLedger(id){
@@ -193,32 +201,90 @@
 		}//end of getCityMetrics()
 
 		//data Querying, should use to search in the ledgers
-/*		var body = {
-			"query": {
-				"bool": {
-					"must": [
-						{ "match": { "entity": 23 }},
-						{ "match": { "name": "population"}}
-					]
+		function getSingleMetricData(name, param, callback){
+			function getName(name, param, fn){
+				for (city in city_name_id){
+					if(city_name_id[city].name === name){
+						//console.log(city_name_id[city].id);
+						fn(city_name_id[city].id);
+						break;
+					};
+				};
+			};
+
+			//create a callback for city_name_id, or create local cache3
+
+			/*var id =*/ getName(name, param, function(id){
+				console.log("d + " + id);
+
+				var data_array = [];
+				var body = {
+					"query": {
+						"bool": {
+							"must": [
+								{ "match": { "entity": id }},
+								{ "match": { "name": param}}
+							]
+						}
+					}
+				};
+				$.ajax({
+					type: "POST",
+					url: "http://sbhacks.opengovhacks.com/api/v1/metrics/_search",
+					data: JSON.stringify(body)
+				})
+				.error(function( jqXHR, textStatus, errorThrown){
+					console.log(jqXHR);
+				})
+				.done(function(data){
+					for(var key in data.metrics[0].years){
+						data_array.push(data.metrics[0].years[key].value);
+					}
+					//console.log(data_array); //use a call back here
+					callback([data_array, name]);
+					//console.log(JSON.stringify(data, null, 2));
+				});
+
+
+
+				//return data;
+			});
+
+			id = 23; //must make a call back in order to access city_name_id
+
+			/*var data_array = [];
+			var body = {
+				"query": {
+					"bool": {
+						"must": [
+							{ "match": { "entity": id }},
+							{ "match": { "name": param}}
+						]
+					}
 				}
-			}
-		};
-		$.ajax({
-			type: "POST",
-			url: "http://sbhacks.opengovhacks.com/api/v1/metrics/_search",
-			data: body
-		})
-		.error(function( jqXHR, textStatus, errorThrown){
-			console.log(jqXHR);
-		})
-		.done(function(data){
-			console.log("doing POST")
-			console.log(JSON.stringify(data, null, 2));
-		});*/
+			};
+			$.ajax({
+				type: "POST",
+				url: "http://sbhacks.opengovhacks.com/api/v1/metrics/_search",
+				data: JSON.stringify(body)
+			})
+			.error(function( jqXHR, textStatus, errorThrown){
+				console.log(jqXHR);
+			})
+			.done(function(data){
+				for(var key in data.metrics[0].years){
+					data_array.push(data.metrics[0].years[key].value);
+				}
+				//console.log(data_array); //use a call back here
+				callback(data_array);
+				//console.log(JSON.stringify(data, null, 2));
+			});*/
+		}; //end of getSingleMetricData()
 
 
 		//Looks at text in boxe -> then grabs associated data
 		$('#apply-selected-cities').click(function(){
+			city_data = [];
 			$('#place').empty();
 			current_cities = [
 				document.getElementById('city1_dropdown').value,
@@ -250,19 +316,56 @@
 				//currently accessing an object in the array
 				//console.log(city_data[city]); //why is 0-1 passed in rather than id val
 				var data_input = [];
-				for (val in city_data[city]){
-					console.log(city_data[city][val][0]);//currently accessing population array
+				//for (val in city_data[city]){
+					/*console.log(city_data[city][val][0]);//currently accessing population array
 					for(final_val in city_data[city][val][0]){
 						console.log(city_data[city][val][9][final_val]);
 						data_input = city_data[city][val][9][final_val];
-					}
-				}
-				series_input.push({
+					}*/
+
+					//fix below to account for entity
+					var param = document.getElementById("graph-dropdown").value;
+					var currentCity = current_cities[city];
+					console.log(param + " : " + currentCity);
+					/*var data_input_temp = getSingleMetricData(currentCity, param, function(data){
+						console.log("d + " + data);
+						return data;
+					});*/
+					//setTimeout(function(){ 
+						/*data_input.push(getSingleMetricData(currentCity, param, function(data){
+							console.log("s + " + data);
+							return data;
+						}));*/
+
+
+					getSingleMetricData(currentCity, param, function(data){
+						console.log("s + " + data[0] + data[1]);
+						series_input.push({
+							name: data[1],
+							data: data[0]
+						});
+					}) 	
+
+
+						/*series_input.push({
+							name: current_cities[city],
+							data: getSingleMetricData(currentCity, param, function(data){
+								console.log("s + " + data);
+								return data;
+							}) 	
+						});
+						console.log(series_input);
+				//}//end of for loop
+
+				/*series_input.push({
 					name: current_cities[city],
-					data: data_input 	
-				});
+					data: data_input[city] 	
+				});*/
 			}
-			createChart(series_input, "Murders Raw", "Total");
+			setTimeout(function(){
+				createChart(series_input, "Murders Per Year, Unadjusted", "Total");
+				console.log(series_input);
+			}, 2200)
 		});
 		$('#adjust-graph').click(function(){
 			var series_input = [];

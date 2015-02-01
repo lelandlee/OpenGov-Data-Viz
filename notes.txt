@@ -20,3 +20,8 @@ Why is there signifigant lag when using the website?
 better to query data or grab all?
 Create a table at the bottom? to go along with chart?
 Concatinate all the JSON files together rather than add to a object array...
+
+
+use getSingleMetricData() to send data that is grabbed from the Select View...
+
+Add maps with data points -> when click -> show on chart
