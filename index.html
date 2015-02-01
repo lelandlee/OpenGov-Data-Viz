@@ -92,6 +92,7 @@
 		var city_data = [];//array of objects with arrays inside
 		var current_cities = [];
 		var list_of_metrics = [];
+		var city_population = [];
 
 		//to create the city_name_id -> getting names + id ->  turn into callback
 		$.ajax({
@@ -148,6 +149,10 @@
 							city_data.push({
 								id: city_metrics
 							})
+							city_population.push({
+								name: city_name_id[city], 
+								data: data[0]
+							});
 						}); //callback issue...
 					}, 1000);
 					//getGeneralLedger(id); //calling general ledger
@@ -173,7 +178,6 @@
 			    	var temp_array = [];
 			    	for(var date in data.metrics[key].years){
 			    		$('#place').append(" " + data.metrics[key].years[date].year + " : " + data.metrics[key].years[date].value + ",");
-			    		//adding values to temporary array before moving to city_data array
 			    		temp_array.push(data.metrics[key].years[date].value);
 			    	}
 			    	local_metric_complete.push({//how to push to the right array
@@ -212,11 +216,7 @@
 				};
 			};
 
-			//create a callback for city_name_id, or create local cache3
-
-			/*var id =*/ getName(name, param, function(id){
-				console.log("d + " + id);
-
+			getName(name, param, function(id){
 				var data_array = [];
 				var body = {
 					"query": {
@@ -244,47 +244,12 @@
 					callback([data_array, name]);
 					//console.log(JSON.stringify(data, null, 2));
 				});
-
-
-
-				//return data;
 			});
-
-			id = 23; //must make a call back in order to access city_name_id
-
-			/*var data_array = [];
-			var body = {
-				"query": {
-					"bool": {
-						"must": [
-							{ "match": { "entity": id }},
-							{ "match": { "name": param}}
-						]
-					}
-				}
-			};
-			$.ajax({
-				type: "POST",
-				url: "http://sbhacks.opengovhacks.com/api/v1/metrics/_search",
-				data: JSON.stringify(body)
-			})
-			.error(function( jqXHR, textStatus, errorThrown){
-				console.log(jqXHR);
-			})
-			.done(function(data){
-				for(var key in data.metrics[0].years){
-					data_array.push(data.metrics[0].years[key].value);
-				}
-				//console.log(data_array); //use a call back here
-				callback(data_array);
-				//console.log(JSON.stringify(data, null, 2));
-			});*/
 		}; //end of getSingleMetricData()
 
 
 		//Looks at text in boxe -> then grabs associated data
 		$('#apply-selected-cities').click(function(){
-			city_data = [];
 			$('#place').empty();
 			current_cities = [
 				document.getElementById('city1_dropdown').value,
@@ -313,81 +278,56 @@
 			var series_input = [];
 
 			for(city in current_cities){
-				//currently accessing an object in the array
-				//console.log(city_data[city]); //why is 0-1 passed in rather than id val
 				var data_input = [];
-				//for (val in city_data[city]){
-					/*console.log(city_data[city][val][0]);//currently accessing population array
-					for(final_val in city_data[city][val][0]){
-						console.log(city_data[city][val][9][final_val]);
-						data_input = city_data[city][val][9][final_val];
-					}*/
+				//fix below to account for entity
+				var param = document.getElementById("graph-dropdown").value;
+				var currentCity = current_cities[city];
+				console.log(param + " : " + currentCity);
 
-					//fix below to account for entity
-					var param = document.getElementById("graph-dropdown").value;
-					var currentCity = current_cities[city];
-					console.log(param + " : " + currentCity);
-					/*var data_input_temp = getSingleMetricData(currentCity, param, function(data){
-						console.log("d + " + data);
-						return data;
-					});*/
-					//setTimeout(function(){ 
-						/*data_input.push(getSingleMetricData(currentCity, param, function(data){
-							console.log("s + " + data);
-							return data;
-						}));*/
-
-
-					getSingleMetricData(currentCity, param, function(data){
-						console.log("s + " + data[0] + data[1]);
-						series_input.push({
-							name: data[1],
-							data: data[0]
-						});
-					}) 	
-
-
-						/*series_input.push({
-							name: current_cities[city],
-							data: getSingleMetricData(currentCity, param, function(data){
-								console.log("s + " + data);
-								return data;
-							}) 	
-						});
-						console.log(series_input);
-				//}//end of for loop
-
-				/*series_input.push({
-					name: current_cities[city],
-					data: data_input[city] 	
-				});*/
+				getSingleMetricData(currentCity, param, function(data){
+					console.log("s + " + data[0] + data[1]);
+					series_input.push({
+						name: data[1],
+						data: data[0]
+					});
+				}) 	
 			}
 			setTimeout(function(){
-				createChart(series_input, "Murders Per Year, Unadjusted", "Total");
+				var content = document.getElementById("graph-dropdown").value;
+				createChart(series_input, content + "Per Year, Unadjusted", "Total");
 				console.log(series_input);
-			}, 2200)
+			}, 1000)
 		});
+
+		//need to adopt to new model of elastic search rather than local
 		$('#adjust-graph').click(function(){
 			var series_input = [];
 
-			for(city in current_cities){
-				var data_input = [];
-				for (val in city_data[city]){
-					for(final_val in city_data[city][val][9]){
-						for(indiv_val in city_data[city][val][9][final_val]){
-							var value = city_data[city][val][9][final_val][indiv_val];
-							var pop = city_data[city][val][0][final_val][indiv_val]
-							data_input.push(value/pop * 100000); //per 100k
+				var param = document.getElementById("graph-dropdown").value;
+				var pop = getSingleMetricData(current_cities[city], param, function(data1){
+					console.log("inner out");
+					setTimeout(function(){ 
+						var pop = city_population[0].data.metric_name;
+						console.log("i - " + data1[0] + " : " + pop);
+
+						var temp_array = [];
+						for(var x in pop){
+							temp_array.push(data1[0][x]/pop[x] * 100000); 
 						}
-					}
-				}
-				console.log(data_input)
-				series_input.push({
-					name: current_cities[city],
-					data: data_input 	
+						series_input.push({
+							name: data1[1],
+							data: temp_array
+						});
+					}, 1000);
 				});
+
+
 			}
-			createChart(series_input, "Murders - Adjusted", "Per Hundred Thousand");
+			setTimeout(function(){
+				var content = document.getElementById("graph-dropdown").value;
+				createChart(series_input, content + " - Adjusted", "Per Hundred Thousand");
+				console.log(series_input);
+			}, 2000)
 		});
 	</script>
 
