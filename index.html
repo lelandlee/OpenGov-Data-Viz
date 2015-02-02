@@ -2,9 +2,8 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>Open Gov Data Viz</title>
+		<title>Open Gov Data Viz - Runoff</title>
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-		<script src="d3/d3.js"></script>
 		<link rel="stylesheet" href="style.css">
 
 		<!-- Highcharts -->
@@ -150,7 +149,7 @@
 	    	//console.log(data.cities[key])
 	    }
 	    //Update dropdown with populated cities:
-	    //why errors arise when combined?
+	    //more efficient to add options to array then loop though and add to dropdown
     	for(i in city_name_id){
 		    var option = document.createElement("option");
 		    option.text = city_name_id[i].name;

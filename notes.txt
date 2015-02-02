@@ -11,9 +11,6 @@ goal:
  - chord diagram in change of $$
 
 
-Add feature to select what to show on graph...
-
-
 Data would be better if could query a relational database
 Why is there signifigant lag when using the website?
 
@@ -32,6 +29,4 @@ Had two options for accessing info:
 
 show two charts -> adjusted + non adjusted
 
-
-add moving adverage?
-
+Calculate averages -> aggregate + regional + current selection
